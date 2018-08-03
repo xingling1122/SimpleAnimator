@@ -20,7 +20,7 @@ Add it in your root build.gradle at the end of repositories:
 Step 2. Add the dependency
 
 	dependencies {
-	        implementation 'com.github.xingling1122:SimpleAnimator:1.1'
+	        implementation 'com.github.xingling1122:SimpleAnimator:1.8'
 	}
   
  maven:
@@ -41,5 +41,5 @@ Step 2. Add the dependency
 	<dependency>
 	    <groupId>com.github.xingling1122</groupId>
 	    <artifactId>SimpleAnimator</artifactId>
-	    <version>1.1</version>
+	    <version>1.8</version>
 	</dependency>
