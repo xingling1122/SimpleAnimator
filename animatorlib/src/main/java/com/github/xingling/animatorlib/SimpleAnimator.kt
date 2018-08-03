@@ -3,10 +3,13 @@ package com.github.xingling.animatorlib
 import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
-import android.support.annotation.IntDef
+import android.content.Context
 import android.support.annotation.IntRange
 import android.view.View
 import android.view.animation.Interpolator
+import com.opensource.svgaplayer.SVGAImageView
+import com.opensource.svgaplayer.SVGAParser
+import com.opensource.svgaplayer.SVGAVideoEntity
 
 class SimpleAnimator {
     private val animationList = ArrayList<AnimatorBuilder>()
@@ -15,6 +18,8 @@ class SimpleAnimator {
     private var interpolator: Interpolator? = null
     private var repeatCount: Int = 0
     private var repeatMode = ValueAnimator.RESTART
+    private var svgaName: String? = null
+    private var svgaViews: ArrayList<View>? = null
 
     private var animatorSet: AnimatorSet? = null
     private var startListener: AnimatorListener.Start? = null
@@ -30,12 +35,6 @@ class SimpleAnimator {
             val simpleAnimator = SimpleAnimator()
             return simpleAnimator.addAnimatorBuilder(*views)
         }
-    }
-
-    @IntDef(flag = false, value = intArrayOf(ValueAnimator.RESTART, ValueAnimator.REVERSE))
-    @Retention(AnnotationRetention.SOURCE)
-    annotation class RepeatMode {
-
     }
 
     fun addAnimatorBuilder(vararg views: View): AnimatorBuilder {
@@ -101,16 +100,46 @@ class SimpleAnimator {
         if (prev != null) {
             prev?.start()
         } else {
+            startSVGA()
             animatorSet = createAnimatorSet()
             animatorSet?.start()
         }
         return this
     }
 
+    private fun startSVGA() {
+        if (svgaViews?.size != 0) {
+            val parser = svgaViews?.let { SVGAParser(it.get(0).context) }
+            svgaName?.let {
+                parser?.parse(it, object : SVGAParser.ParseCompletion {
+                    override fun onComplete(svgaVideoEntity: SVGAVideoEntity) {
+                        svgaViews?.forEach {
+                            val svga = it as SVGAImageView
+                            svga.setVideoItem(svgaVideoEntity)
+                            svga.startAnimation()
+                        }
+                    }
+
+                    override fun onError() {
+
+                    }
+                })
+            }
+        }
+    }
+
     fun cancel() {
         animatorSet?.cancel()
+        cancelSVGA()
         next?.cancel()
         next = null
+    }
+
+    private fun cancelSVGA() {
+        svgaViews?.forEach {
+            val svga = it as SVGAImageView
+            svga.stopAnimation()
+        }
     }
 
     fun duration(duration: Long): SimpleAnimator {
@@ -142,6 +171,12 @@ class SimpleAnimator {
      */
     fun repeatMode(@RepeatMode repeatMode: Int): SimpleAnimator {
         this.repeatMode = repeatMode
+        return this
+    }
+
+    fun svga(svgaViews: ArrayList<View>, svgaName: String): SimpleAnimator {
+        this.svgaViews = svgaViews
+        this.svgaName = svgaName
         return this
     }
 

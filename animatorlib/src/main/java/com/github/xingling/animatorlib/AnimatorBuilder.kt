@@ -15,6 +15,7 @@ import android.view.animation.CycleInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.Interpolator
 import android.widget.TextView
+import com.opensource.svgaplayer.SVGAImageView
 import java.util.ArrayList
 
 class AnimatorBuilder(animator: SimpleAnimator, vararg views: View) {
@@ -277,6 +278,36 @@ class AnimatorBuilder(animator: SimpleAnimator, vararg views: View) {
         return this
     }
 
+    /**
+     * Height animation builder.
+     *
+     * @param height the height
+     * @return the animation builder
+     */
+    fun height(vararg height: Float): AnimatorBuilder {
+        return custom(object : AnimatorListener.Update<View> {
+            override fun update(view: View, value: Float) {
+                view.layoutParams.height = value.toInt()
+                view.requestLayout()
+            }
+        }, *height)
+    }
+
+    /**
+     * Width animation builder.
+     *
+     * @param width the width
+     * @return the animation builder
+     */
+    fun width(vararg width: Float): AnimatorBuilder {
+        return custom(object : AnimatorListener.Update<View> {
+            override fun update(view: View, value: Float) {
+                view.layoutParams.width = value.toInt()
+                view.requestLayout()
+            }
+        }, *width)
+    }
+
 
     /**
      * Create animators list.
@@ -346,7 +377,7 @@ class AnimatorBuilder(animator: SimpleAnimator, vararg views: View) {
      * @param repeatMode the repeat mode
      * @return the animation builder
      */
-    fun repeatMode(@SimpleAnimator.RepeatMode repeatMode: Int): AnimatorBuilder {
+    fun repeatMode(@RepeatMode repeatMode: Int): AnimatorBuilder {
         viewAnimator.repeatMode(repeatMode)
         return this
     }
@@ -643,5 +674,16 @@ class AnimatorBuilder(animator: SimpleAnimator, vararg views: View) {
                 Log.d(null, "path: value=$value, x=$x, y=$y")
             }
         }, 0F, pathMeasure.length)
+    }
+
+    fun svga(svgaName: String): AnimatorBuilder {
+        var svgaViews = ArrayList<View>()
+        for (view in views) {
+            if (view is SVGAImageView) {
+                svgaViews.add(view)
+            }
+        }
+        viewAnimator.svga(svgaViews, svgaName)
+        return this
     }
 }
